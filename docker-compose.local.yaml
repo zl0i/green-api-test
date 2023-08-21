@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.9.29-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=queue
+      - RABBITMQ_DEFAULT_PASS=queue
+    expose:
+      - 5672
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  web:
+    image: node:lts-alpine
+    working_dir: /opt/server/
+    restart: always
+    entrypoint: npm run dev
+    volumes:
+      - ./web/:/opt/server/
+    environment:
+      - NODE_ENV=dev
+      - RABBITMQ_HOST=rabbitmq
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+
+  worker:
+    image: node:lts-alpine
+    working_dir: /opt/server/
+    restart: always
+    entrypoint: npm run dev
+    volumes:
+      - ./worker/:/opt/server/
+    environment:
+      - NODE_ENV=dev
+      - RABBITMQ_HOST=rabbitmq
+    expose:
+      - 5672
